@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: zmkfirmware/zmk-build-arm:stable
+      image: zmkfirmware/zmk-build-arm:2.5
     name: Build
     steps:
       - name: Checkout
@@ -35,6 +35,9 @@ jobs:
         run: west zephyr-export
       - name: West Build (Cradio/Sweep Left)
         run: west build -s zmk/app -b nice_nano_v2 -- -DSHIELD=cradio_left -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
+      - name: Cradio/Sweep DTS File
+        if: ${{ always() }}
+        run: cat -n build/zephyr/nice_nano_v2.dts.pre.tmp
       - name: Cradio/Sweep Left Kconfig file
         run: cat build/zephyr/.config | grep -v "^#" | grep -v "^$"
       - name: Rename zmk.uf2
@@ -42,7 +45,7 @@ jobs:
       - name: Archive (Cradio/Sweep Left)
         uses: actions/upload-artifact@v2
         with:
-          name: firmware-zmk-sweep
+          name: firmware
           path: cradio_left_nice_nano_v2.uf2
       - name: West Build (Cradio/Sweep Right)
         run: west build --pristine -s zmk/app -b nice_nano_v2 -- -DSHIELD=cradio_right -DZMK_CONFIG="${GITHUB_WORKSPACE}/config"
@@ -54,5 +57,5 @@ jobs:
       - name: Archive (Cradio/Sweep Right)
         uses: actions/upload-artifact@v2
         with:
-          name: firmware-zmk-sweep
+          name: firmware
           path: cradio_right_nice_nano_v2.uf2
